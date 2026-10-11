@@ -1,60 +1,115 @@
-# AI Document Intelligence Platform
+# AI Document Intelligence Platform 📄🤖
 
-An AI-powered contract analysis platform that helps users understand legal documents by identifying important clauses, detecting potential risks, summarizing contracts, and answering questions using Retrieval-Augmented Generation (RAG).
+An AI-powered document analysis platform that helps users understand contracts by extracting key information, identifying important clauses, detecting potential risks, and answering questions based on the uploaded document.
 
-## Features
+## 🚀 Live Demo
 
-- **PDF Document Analysis:** Upload PDF contracts and extract their text.
-- **Clause Detection:** Identify clauses such as liability, payment, and intellectual property.
-- **Risk Detection:** Highlight potentially risky contract terms and generate a risk score.
-- **AI-Powered Summarization:** Generate concise summaries of uploaded documents.
-- **Ask AI:** Ask questions about a contract and receive context-based answers.
-- **Semantic Search:** Retrieve relevant document sections using vector embeddings.
+- **Frontend:** https://ai-document-intelligence-flame.vercel.app
+- **Backend API:** https://ai-document-intelligence-immb.onrender.com
+- **API Documentation:** https://ai-document-intelligence-immb.onrender.com/docs
 
-## Tech Stack
+## ✨ Features
 
-- **Backend:** Python, FastAPI
-- **Frontend:** React, TypeScript, Vite
-- **Database:** PostgreSQL, pgvector
-- **AI/LLM:** Ollama, Llama 3.2
-- **Embeddings:** all-MiniLM
-- **Document Processing:** PyPDF
-- **Tools:** Git, GitHub, Docker
+- **PDF Upload:** Upload PDF contracts for automated analysis.
+- **Document Summarization:** Generate a concise overview of the document.
+- **Clause Detection:** Identify important clauses, including liability, payment, and intellectual property.
+- **Risk Detection:** Highlight potentially risky contract terms and display a risk score.
+- **AI-Powered Q&A:** Ask questions about the uploaded document and receive context-based answers.
+- **Web Interface:** Interact with document analysis results through a responsive frontend.
 
-## Architecture
+## 🛠️ Tech Stack
 
-1. Upload a contract PDF through the frontend.
-2. Extract text and split it into smaller chunks.
-3. Generate embeddings and store document chunks in PostgreSQL with pgvector.
-4. Analyze clauses and detect potential risks.
-5. Retrieve relevant chunks using vector similarity for AI-powered question answering.
+| Layer | Technologies |
+|---|---|
+| Frontend | React, TypeScript, Vite |
+| Backend | Python, FastAPI |
+| Database | PostgreSQL |
+| AI Integration | Gemini API |
+| PDF Processing | Python PDF extraction libraries |
+| Frontend Deployment | Vercel |
+| Backend Deployment | Render |
+| Version Control | Git, GitHub |
 
-## Getting Started
+## 🏗️ Architecture
+
+```text
+User
+  |
+  v
+React + TypeScript Frontend
+  |  Vercel
+  v
+FastAPI Backend
+  |  Render
+  +--> PDF Text Extraction
+  +--> Clause Detection
+  +--> Risk Scoring
+  +--> Document Summarization
+  +--> AI Question Answering
+  |
+  v
+PostgreSQL Database
+```
+
+## ⚙️ How It Works
+
+1. Upload a PDF contract through the web interface.
+2. The backend extracts text from the document.
+3. The application identifies relevant clauses and potential risks.
+4. A summary and risk score are displayed.
+5. Ask questions about the uploaded contract to receive answers based on the retrieved document context.
+
+## 💻 Run Locally
 
 ### Prerequisites
 
 - Python
 - Node.js and npm
-- Docker Desktop
-- Ollama with the required models
+- PostgreSQL
 
-### Backend
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/rithikka01/ai-document-intelligence.git
+cd ai-document-intelligence
+```
+
+### 2. Start the backend
 
 ```bash
 cd backend
-python -m venv venv
+python -m venv .venv
 ```
 
-Activate the virtual environment, install dependencies, and start the API:
+Activate the virtual environment.
+
+**Windows:**
+
+```bash
+.venv\Scripts\activate
+```
+
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
-python -m uvicorn main:app --reload
 ```
 
-### Frontend
+Configure the required environment variables in a local `.env` file, including the database connection string and AI API key. Use the variable names expected by your backend configuration.
 
-Open another terminal:
+Start FastAPI:
+
+```bash
+uvicorn main:app --reload
+```
+
+Backend: `http://127.0.0.1:8000`
+
+API documentation: `http://127.0.0.1:8000/docs`
+
+### 3. Start the frontend
+
+Open a second terminal:
 
 ```bash
 cd frontend
@@ -62,30 +117,46 @@ npm install
 npm run dev
 ```
 
-### Database and AI Models
+Open the local URL displayed in your terminal, usually `http://localhost:5173`.
 
-Start PostgreSQL using Docker Compose and ensure Ollama is running with these models:
+## 🔐 Environment Variables
 
-```bash
-ollama pull llama3.2:3b
-ollama pull all-minilm:latest
-```
+Configure secrets through local environment variables and your deployment provider's environment settings.
 
-Configure your database connection in the backend environment before running the application.
+- Database connection URL
+- AI API key
+- Frontend backend URL, as required by the Vite configuration
 
-## Future Improvements
+**Never commit API keys, database passwords, or `.env` files containing secrets.**
 
-- User authentication and document history
-- Contract comparison
-- Downloadable analysis reports
-- Cloud deployment
+## 📸 Screenshots
 
-## Disclaimer
+Add screenshots of the following sections to this repository:
 
-This platform provides AI-assisted contract analysis for informational purposes only. It does not replace advice from a qualified legal professional.
+- Document upload interface
+- Document summary and risk score
+- Detected clauses
+- AI question-and-answer results
 
-## Author
+## 🔮 Future Improvements
+
+- More advanced retrieval-augmented generation (RAG)
+- Support for additional document formats
+- Document history and search
+- Exportable analysis reports
+- Automated tests and improved error handling
+
+## ⚠️ Disclaimer
+
+This project is intended to assist with document understanding and preliminary contract review. Its output may be incomplete or inaccurate and should not replace professional legal advice.
+
+## 👩‍💻 Author
 
 **Rithikka N.**
 
-GitHub: [rithikka01](https://github.com/rithikka01)
+- GitHub: https://github.com/rithikka01
+- LinkedIn: https://www.linkedin.com/in/rithikka-n-7018a2257/
+
+---
+
+Built with Python, FastAPI, React, TypeScript, PostgreSQL, and AI.
