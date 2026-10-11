@@ -446,6 +446,7 @@ async def analyze_document(
     }
 
 
+
 # --------------------------------------------------
 # Ask AI about the latest uploaded document
 # --------------------------------------------------
@@ -487,31 +488,30 @@ def ask_question(
         .all()
     )
 
-    if not stored_chunks:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "No document chunks found. "
-                "Please upload the PDF again."
-            ),
-        )
-
+    # Retrieve relevant chunks from the uploaded document.
     relevant_chunks = select_relevant_chunks(
         [chunk.content for chunk in stored_chunks],
         question,
         limit=3,
     )
 
-    if not relevant_chunks:
+    # Fall back to the complete extracted text if no chunks match.
+    if relevant_chunks:
+        context = "\n\n".join(relevant_chunks)
+    else:
+        context = (document.text or "").strip()
+
+    if not context:
         raise HTTPException(
             status_code=400,
             detail=(
-                "I couldn't find relevant text for that question "
-                "in the document. Try asking it differently."
+                "No extracted document text is available. "
+                "Please upload the PDF again."
             ),
         )
 
-    context = "\n\n".join(relevant_chunks)
+    # Limit the amount of text sent to the AI provider.
+    context = context[:12000]
 
     try:
         answer = generate_answer(
@@ -556,3 +556,4 @@ def ask_question(
                 "Check the HF_TOKEN environment variable and backend logs."
             ),
         )
+
