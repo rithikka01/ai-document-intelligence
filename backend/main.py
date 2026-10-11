@@ -227,14 +227,14 @@ def create_summary(
 
 
 # --------------------------------------------------
-# Keyword-based document retrieval
-# --------------------------------------------------
 
 def select_relevant_chunks(
     chunks: list[str],
     question: str,
     limit: int = 3,
 ) -> list[str]:
+    import re
+
     stop_words = {
         "what", "when", "where", "which", "who", "whom",
         "why", "how", "does", "did", "the", "and", "for",
@@ -242,16 +242,17 @@ def select_relevant_chunks(
         "can", "could", "would", "should", "about", "tell",
         "please", "document", "contract", "explain", "show",
         "me", "is", "it", "of", "in", "to", "on", "a", "an",
+        "say", "says", "clause", "agreement",
     }
 
     terms = {
         term
-        for term in re.findall(
-            r"[a-zA-Z0-9]+",
-            question.lower(),
-        )
+        for term in re.findall(r"[a-zA-Z0-9]+", question.lower())
         if len(term) > 2 and term not in stop_words
     }
+
+    if not chunks:
+        return []
 
     if not terms:
         return chunks[:limit]
@@ -259,29 +260,22 @@ def select_relevant_chunks(
     ranked = []
 
     for index, chunk in enumerate(chunks):
-        lower_chunk = chunk.lower()
+        words = set(re.findall(r"[a-zA-Z0-9]+", chunk.lower()))
 
-        score = sum(
-            lower_chunk.count(term)
-            for term in terms
-        )
+        # Match exact words, avoiding misleading partial matches.
+        score = sum(1 for term in terms if term in words)
 
+        # Give extra weight to chunks containing multiple question terms.
         if score > 0:
             ranked.append((score, index, chunk))
 
-    ranked.sort(
-        key=lambda item: (-item[0], item[1])
-    )
+    ranked.sort(key=lambda item: (-item[0], item[1]))
 
+    # If no keywords match, provide the first chunks as fallback context.
     if not ranked:
-        # Avoid passing unrelated text to the AI.
-        return []
+        return chunks[:limit]
 
-    return [
-        item[2]
-        for item in ranked[:limit]
-    ]
-
+    return [item[2] for item in ranked[:limit]]
 
 # --------------------------------------------------
 # Hugging Face AI answer generation
