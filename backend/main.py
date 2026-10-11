@@ -277,61 +277,63 @@ def select_relevant_chunks(
 
     return [item[2] for item in ranked[:limit]]
 
+
+
 # --------------------------------------------------
-# Hugging Face AI answer generation
+# Gemini AI answer generation
 # --------------------------------------------------
 
-def generate_answer(
-    context: str,
-    question: str,
-) -> str:
-    token = os.environ.get("HF_TOKEN")
+def generate_answer(context: str, question: str) -> str:
+    api_key = os.environ.get("GEMINI_API_KEY")
 
-    if not token:
+    if not api_key:
         raise RuntimeError(
-            "HF_TOKEN is missing from the backend environment variables."
+            "GEMINI_API_KEY is missing from the backend environment variables."
         )
 
     response = requests.post(
-        "https://router.huggingface.co/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
+        (
+            "https://generativelanguage.googleapis.com/"
+            "v1beta/models/gemini-2.5-flash-lite:generateContent"
+        ),
+        headers={"Content-Type": "application/json"},
+        params={"key": api_key},
         json={
-            "model": "meta-llama/Llama-3.1-8B-Instruct:fastest",
-            "messages": [
+            "contents": [
                 {
-                    "role": "system",
-                    "content": (
-                        "You are a contract analysis assistant. "
-                        "Answer using only the supplied document context. "
-                        "Be clear and concise. Do not invent contract terms. "
-                        "If the answer is not available in the context, "
-                        "say it is not clearly stated in the document. "
-                        "This is informational assistance, not legal advice."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"Document context:\n{context}\n\n"
-                        f"Question: {question}"
-                    ),
-                },
+                    "parts": [
+                        {
+                            "text": (
+                                "You are a contract analysis assistant. "
+                                "Answer using only the supplied document context. "
+                                "Be clear and concise. Do not invent contract terms. "
+                                "If the answer is unavailable, say it is not "
+                                "clearly stated in the document. "
+                                "This is informational assistance, not legal advice."
+                                f"\n\nDocument context:\n{context}"
+                                f"\n\nQuestion: {question}"
+                            )
+                        }
+                    ]
+                }
             ],
-            "max_tokens": 400,
-            "temperature": 0.2,
+            "generationConfig": {
+                "maxOutputTokens": 400,
+                "temperature": 0.2,
+            },
         },
         timeout=60,
     )
 
     if not response.ok:
-        print("Hugging Face response:", response.status_code, response.text)
+        print("Gemini API response:", response.status_code, response.text)
+
     response.raise_for_status()
 
     data = response.json()
-    answer = data["choices"][0]["message"]["content"]
+    answer = (
+        data["candidates"][0]["content"]["parts"][0]["text"]
+    )
 
     if not answer or not answer.strip():
         raise RuntimeError("The AI returned an empty answer.")
@@ -449,6 +451,7 @@ async def analyze_document(
 
 
 
+
 # --------------------------------------------------
 # Ask AI about the latest uploaded document
 # --------------------------------------------------
@@ -484,20 +487,16 @@ def ask_question(
 
     stored_chunks = (
         db.query(DocumentChunk)
-        .filter(
-            DocumentChunk.document_id == document.id
-        )
+        .filter(DocumentChunk.document_id == document.id)
         .all()
     )
 
-    # Retrieve relevant chunks from the uploaded document.
     relevant_chunks = select_relevant_chunks(
         [chunk.content for chunk in stored_chunks],
         question,
         limit=3,
     )
 
-    # Fall back to the complete extracted text if no chunks match.
     if relevant_chunks:
         context = "\n\n".join(relevant_chunks)
     else:
@@ -512,7 +511,7 @@ def ask_question(
             ),
         )
 
-    # Limit the amount of text sent to the AI provider.
+    # Limit the amount of text sent to Gemini.
     context = context[:12000]
 
     try:
@@ -534,28 +533,31 @@ def ask_question(
             else "unknown"
         )
 
-        print(
-            "Hugging Face HTTP error:",
-            status_code,
-            str(error),
-        )
+        print("Gemini API HTTP error:", status_code, str(error))
 
         raise HTTPException(
             status_code=502,
             detail=(
-                "The AI provider returned an error. "
-                "Check the backend logs and Hugging Face model access."
+                "The Gemini API returned an error. "
+                "Check the backend logs and GEMINI_API_KEY configuration."
             ),
         )
 
+    except requests.exceptions.RequestException as error:
+        print("Gemini API connection error:", str(error))
+
+        raise HTTPException(
+            status_code=502,
+            detail="Could not connect to the Gemini API.",
+        )
+
     except Exception as error:
-        print("AI answer generation error:", error)
+        print("AI answer generation error:", str(error))
 
         raise HTTPException(
             status_code=502,
             detail=(
                 "Could not generate an answer. "
-                "Check the HF_TOKEN environment variable and backend logs."
+                "Check the backend logs and GEMINI_API_KEY environment variable."
             ),
         )
-
