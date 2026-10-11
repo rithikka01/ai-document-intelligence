@@ -93,7 +93,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/analyze",
+        `${import.meta.env.VITE_API_URL}/analyze`,
         {
           method: "POST",
           body: formData,
@@ -131,7 +131,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/ask",
+        `${import.meta.env.VITE_API_URL}/ask`,
         {
           method: "POST",
           headers: {
