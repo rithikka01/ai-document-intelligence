@@ -326,6 +326,8 @@ def generate_answer(
         timeout=60,
     )
 
+    if not response.ok:
+        print("Hugging Face response:", response.status_code, response.text)
     response.raise_for_status()
 
     data = response.json()
