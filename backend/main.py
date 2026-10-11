@@ -299,7 +299,7 @@ def generate_answer(
             "Content-Type": "application/json",
         },
         json={
-            "model": "Qwen/Qwen2.5-7B-Instruct:fastest",
+            "model": "meta-llama/Llama-3.1-8B-Instruct:fastest",
             "messages": [
                 {
                     "role": "system",
