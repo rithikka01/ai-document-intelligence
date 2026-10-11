@@ -5,6 +5,4 @@ pypdf
 sqlalchemy
 psycopg[binary]
 python-dotenv
-scikit-learn
-pgvector
-huggingface_hub
+requests
