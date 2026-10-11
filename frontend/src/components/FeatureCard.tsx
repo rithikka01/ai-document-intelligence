@@ -1,9 +1,20 @@
-function FeatureCard() {
-    return (
-        <div className="feature-card">
-            <span>✓</span>
-            <h3>Feature Title</h3>
-            <p>Feature description goes here.</p>
-        </div>
-    );
+
+type FeatureCardProps = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+export default function FeatureCard({
+  icon,
+  title,
+  description,
+}: FeatureCardProps) {
+  return (
+    <div className="feature-card">
+      <span className="feature-icon">{icon}</span>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
+  );
 }
